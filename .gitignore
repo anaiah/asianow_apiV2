@@ -1,0 +1,10 @@
+package-lock.json
+node_modules/*
+*.pem
+*.cer
+*.key
+*.cert
+routes/api_bak03152k24.js
+package-lock.*
+
+/asianow_api
