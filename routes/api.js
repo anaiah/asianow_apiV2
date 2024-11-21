@@ -1,5 +1,5 @@
 const express = require('express')
-const router = express.Router()
+const router = express.Router() 
 
 const { connectPg, closePg}  = require('../db')
 
@@ -107,108 +107,6 @@ router.get("/cookie3", (req, res) => {
 	res.status(200).json({ secret: "Ginger ale is a specific Root Beer" });
 });
 
-
-//========login post
-router.get('/loginpost/:uid/:pwd/:branch',async(req,res)=>{
-    console.log('login=>',req.params.uid,req.params.pwd)
-    
-    connectPg()
-    .then((db)=>{
-
-		let br = ""
-		
-		switch(req.params.branch){
-			case "_sj":
-				br = " asiaone_users_sj " 
-				break;
-			case "_mkti":
-				br = " asiaone_users_mkti "
-				break;
-		}
-
-
-		let sql =`select * from ${br} where uid='${req.params.uid.toUpperCase()}'` 
-        console.log(`${sql}`)
-
-        db.query( sql, (err,data) => { 
-			//console.log(data.length)
-            //console.log(sql)
-			if ( data.rows.length == 0) {  //data = array 
-				console.log('no rec')
-                res.status(400).json({
-					message: "No Matching Record!",
-					voice:"No Matching Record!",
-					found:false
-				})  
-				
-				closePg(db);//CLOSE connection
-                //console.log("===MYSQL CONNECTON CLOSED SUCCESSFULLY===")
-
-            }else{  //=========== ON SUCCESS!!! ============
-
-				//get ip address
-				const ipaddress = IP.address()
-
-				/*  ===TAKE OUT TEMP  IP ADDRESS FEB 2. 2024
-				let ipaddress = iprequest.getClientIp(req)
-
-				if (ipaddress.substring(0, 7) == "::ffff:") {
-					ipaddress = ipaddress.substring(7)
-				}
-				*/
-                console.log('osndp render login data ',data.rows[0])
-				//set cookie-parser
-				res.writeHead(200, {
-						"Set-Cookie": `xfname=${data.rows[0].full_name.toUpperCase()}; HttpOnly`,
-						"Access-Control-Allow-Credentials": "true"
-	  			})
-
-			  res.write(JSON.stringify({
-				email	: 	data.rows[0].email,
-				fname   :   data.rows[0].full_name.toUpperCase(),
-				message	: 	`Welcome to Asia  Now Logistics System, ${data.rows[0].full_name.toUpperCase()}! `,
-				voice	: 	`Welcome to Asia  Now Logistics System, ${data.rows[0].full_name}! `,		
-				grp_id	:	data.rows[0].grp_id,
-				pic 	: 	data.rows[0].pic,
-				ip_addy :   ipaddress,
-				id      :   data.rows[0].id,
-				branch  :   req.params.branch,
-				found:true
-			}))
-
-			res.send()
-			  /*
-				//res.cookie('fname', data.rows[0].full_name.toUpperCase(), { maxAge: 60*1000, httpOnly: true});
-				res.cookie('grp_id', data.rows[0].grp_id, { maxAge: 60*1000,httpOnly: true});
-				res.cookie('f_email',data.rows[0].email, {maxAge: 60*1000,httpOnly: true});
-				res.cookie('f_voice', `Welcome to Executive Optical, O S N D P System ${data.rows[0].full_name}! `, {maxAge: 60*1000,httpOnly: true});
-				res.cookie('f_pic',data.rows[0].pic, {httpOnly: true});
-				
-				res.status(200).json({
-					email	: 	data.rows[0].email,
-                    fname   :   data.rows[0].full_name.toUpperCase(),
-                    message	: 	`Welcome to EO-OSNDP ${data.rows[0].full_name.toUpperCase()}! `,
-					voice	: 	`Welcome to Executive Optical, O S N D P System ${data.rows[0].full_name}! `,		
-                    grp_id	:	data.rows[0].grp_id,
-					pic 	: 	data.rows[0].pic,
-					ip_addy :   ipaddress,
-					found:true
-                })
-				*/
-				//=============== CALL FUNCTION, call express method, call func, call router
-				//return res.redirect(`/changepage/${data.rows[0].grp_id}`)
-
-                closePg(db);//CLOSE connection
-                //console.log("===MYSQL CONNECTON CLOSED SUCCESSFULLY===")
-                
-            }//EIF
-           
-	   })//END QUERY 
-       
-    }).catch((error)=>{
-        res.status(500).json({error:'No Fetch Docs'})
-    }) 
-})//== end loginpost
 
 
 //get Main Malls
@@ -1695,6 +1593,8 @@ const xsaver = (xwhat) =>{
 	console.log(xwhat)
 	return xwhat
 }
+
+
 
 router.get('/mailer/:xname/:xemail/:xpwd', async(req,res)=>{
 	let transporter = nodemailer.createTransport({
