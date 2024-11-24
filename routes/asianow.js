@@ -47,81 +47,74 @@ connectPg()
 });  
 
 
-//==== GET DASHBOARD ====//
+//==== GET DASHBOARD for benny  ====//
 router.get('/getdashboard',async(req,res)=>{
 
 	connectPg()
     .then((db)=>{
 		 	       
-        let sql = `select * from ${br} 
-         WHERE rider_id = ${req.params.riderid} and status = 0 ;`
+        let sql = `SELECT  (
+			select count(distinct(rider_id))
+				from asiaone_warehouse_mkti
+				where status = 0 and rider_id > 0
+			) AS mkti,
+			(select count(distinct(rider_id))
+				from asiaone_warehouse_sj
+				where status = 0 and rider_id > 0
+			) AS snJuan;`
 
-         console.log(sql)
+        console.log(sql)
 
-        db.query(`${sql}`, (err,data) => {
-            console.log( 'writesched()',data.rowCount)
+        db.query(sql , (err,data) => {
+            //console.log( 'writesched()',data.rowCount)
 
+			//console.log( 'data ',data,'err ',err )
             if ( data.rowCount == 0) {   //data = array 
-                
                 closePg(db);//CLOSE connection
-                res.status(500).json({ status : false, voice:'Error!', message:'Error!' })			
+                res.status(500).send('No Data Found, Error!')			
             }else{
+				
+				let oKeys = Object.keys( data.rows[0] )
+				let oVals = Object.values( data.rows[0])
+
 
                 let xtable = 
 				`
 					<table class="table"> 
 					<thead>
 						<tr>
-						<th colspan=2>Delivery List</th>
+						<th>Warehouse</th>
+						<th>Rider Count</th>
 						</tr>
 					</thead>
 					<tbody>`
 
-					for(let zkey in data.rows){
-
-						xtable+= `<tr>
-						<td><i class="fa fa-ambulance"></i> <b>Parcel No.</b></td>
-						<td><b>${data.rows[zkey].package_no}</b></td>
+					for( let zkey in oKeys ){
+				
+						//console.log( oKeys[zkey])
+						xtable+= `
 						<tr>
-						<td><i class="fa fa-user-md"></i> Client</td>
-						<td> ${data.rows[zkey].client_name}</td>
-						</tr>
-						<tr>
-						<td><i class="fa fa-medkit"></i> Amount</td>
-						<td style="white-space:normal !important;word-wrap:break-word;min-width:160px;max-width:160px;">
-						${data.rows[zkey].amount}</td>
-						</tr>
-						<tr>
-						<td colspan=2>
-												
-						<div class='btn-group-vertical' role='group'>
+						<td><b>${ oKeys[zkey].toUpperCase()}</b></td>
+						<td><b>${ oVals[zkey]}</b></td>
 						
-						<button type='button'  id='tag-btn-${zkey}' class='btn btn-success' 
-							onclick='javascript:zonked.tagDelivery("${data.rows[zkey].id}","${br}")'>
-							<i class="fa fa-truck"></i>&nbsp;Tag Delivered 
-						</button>
-						</div>
-						</td>
 						</tr>
 						`
-
+					
 					}
-				/*
-				taken out 10/28/2k24
-						<button type='button' id='gcash-btn-${zkey}' class='btn btn-primary' 
-							onclick='javascript:zonked.paygcash("${data.rows[zkey].case_no}","${data.rows[zkey].patient_name}","${zkey}")'>
-							<i class="fa fa-money"></i>&nbsp;Pay GCASH
-						</button>
-				*/				
 				
 				xtable+=	
 					`</tbody>
 					</table>
 					`
+				
+				closePg( db )
+                res.status(200).send(xtable)
+				
 
-                res.status(200).send(xtable)			
             }//eif
-            closePg( db )
+
+            //closePg( db )
+
         }) //end db.query 
 	    
     }).catch((error)=>{
@@ -145,7 +138,7 @@ router.get('/getdelivery/:riderid/:branch',async(req,res)=>{
 		}
 
         let sql = `select * from ${br} 
-         WHERE rider_id = ${req.params.riderid} and status = 0 ;`
+        		WHERE rider_id = ${req.params.riderid} and status = 0 ;`
 
          console.log(sql)
 
@@ -155,8 +148,8 @@ router.get('/getdelivery/:riderid/:branch',async(req,res)=>{
             if ( data.rowCount == 0) {   //data = array 
                 
                 closePg(db);//CLOSE connection
-                res.status(500).json({ status : false, voice:'Error!', message:'Error!' })			
-            }else{
+                res.status(500).send('No Record Found')
+			}else{
 
                 let xtable = 
 				`
