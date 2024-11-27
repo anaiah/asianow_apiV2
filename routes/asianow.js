@@ -61,9 +61,21 @@ router.get('/getdashboard',async(req,res)=>{
 			(select count(distinct(rider_id))
 				from asiaone_warehouse_sj
 				where status = 0 and rider_id > 0
-			) AS snJuan;`
+			) AS snJuan,
+			(
+			select count(distinct(rider_id))
+				from asiaone_warehouse_sj
+				where status=1 and rider_id>0
+			) as delivered_sj,
+			
+			(
+			
+			select count(distinct(rider_id))
+				from asiaone_warehouse_mkti
+				where status=1 and rider_id>0
+			) as delivered_mkti;`
 
-        console.log(sql)
+        //console.log(sql)
 
         db.query(sql , (err,data) => {
             //console.log( 'writesched()',data.rowCount)
