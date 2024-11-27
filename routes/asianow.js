@@ -115,8 +115,16 @@ router.get('/getdashboard',async(req,res)=>{
 					}
 				
 				xtable+=	
-					`</tbody>
-					</table>
+					`
+						<tr>
+						<TD>
+						<button type='button' onclick='javascript:zonked.insertDashboard()' class='btn btn-success btn-sm'>Refresh</button>
+						</TD>
+						</tr>
+					
+					</tbody>
+					</table><br>
+					
 					`
 				
 				closePg( db )
